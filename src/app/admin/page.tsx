@@ -1,17 +1,21 @@
+import { db } from "@/db";
+import { roster as rosterSchema } from "@/db/schema";
+import { asc } from "drizzle-orm";
+
 async function getRoster() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/roster`, {
-    cache: "no-store",
+  const allRoster = await db.query.roster.findMany({
+    orderBy: [asc(rosterSchema.arrivalDateTime)],
   });
-  return res.json();
+  return allRoster;
 }
 
 interface Roster {
   id: number;
   name: string;
-  arrivalDateTime: string;
-  departureDateTime: string;
+  arrivalDateTime: Date;
+  departureDateTime: Date;
   arrivalCity: string;
-  createdAt: string;
+  createdAt: Date;
 }
 
 export default async function AdminPage() {

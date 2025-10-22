@@ -10,6 +10,7 @@ export default function Home() {
     arrivalCity: "",
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -18,20 +19,35 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitted(false);
-    await fetch("/api/roster", {
-      method: "POST",
-      body: JSON.stringify(formData),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    setIsSubmitted(true);
-    setFormData({
-      name: "",
-      arrivalDateTime: "",
-      departureDateTime: "",
-      arrivalCity: "",
-    });
+    setSubmissionError(null);
+
+    try {
+      const response = await fetch("/api/roster", {
+        method: "POST",
+        body: JSON.stringify(formData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit. Please try again.");
+      }
+
+      setIsSubmitted(true);
+      setFormData({
+        name: "",
+        arrivalDateTime: "",
+        departureDateTime: "",
+        arrivalCity: "",
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        setSubmissionError(error.message);
+      } else {
+        setSubmissionError("An unknown error occurred.");
+      }
+    }
   };
 
   return (
@@ -52,6 +68,11 @@ export default function Home() {
           {isSubmitted && (
             <div className="mb-4 rounded-md bg-green-100 p-4 text-green-800">
               Thank you! Your information has been submitted.
+            </div>
+          )}
+          {submissionError && (
+            <div className="mb-4 rounded-md bg-red-100 p-4 text-red-800">
+              {submissionError}
             </div>
           )}
           <form className="space-y-6" onSubmit={handleSubmit}>
