@@ -26,6 +26,8 @@ interface Roster {
   createdAt: Date;
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPage() {
   const roster: Roster[] | null = await getRoster();
 
